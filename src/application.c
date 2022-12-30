@@ -9,8 +9,7 @@ static twr_led_t lcd_leds;
 // BOOT button (LCD buttons and encoder wheel button)
 static twr_button_t button;
 
-// Thermometer instance
-static twr_tmp112_t tmp112;
+static twr_tag_temperature_t temperature_tag;
 
 extern void application_error(twr_error_t code);
 static void mailbox_notification_update(uint64_t *id, const char *topic, void *value, void *param);
@@ -33,17 +32,19 @@ static void button_event_handler(twr_button_t *self, twr_button_event_t event, v
     }
 }
 
-void tmp112_event_handler(twr_tmp112_t *self, twr_tmp112_event_t event, void *event_param)
+void temperature_tag_event_handler(twr_tag_temperature_t *self, twr_tag_temperature_event_t event, void *event_param)
 {
-    if (event == TWR_TMP112_EVENT_UPDATE)
+    if (event == TWR_TAG_TEMPERATURE_EVENT_UPDATE)
     {
         float celsius;
-        // Read temperature
-        twr_tmp112_get_temperature_celsius(self, &celsius);
 
+        twr_tag_temperature_get_temperature_celsius(self, &celsius);
         twr_log_debug("APP: temperature: %.2f °C", celsius);
-
-        twr_radio_pub_temperature(TWR_RADIO_PUB_CHANNEL_R1_I2C0_ADDRESS_ALTERNATE, &celsius);
+        twr_radio_pub_temperature(TWR_RADIO_PUB_CHANNEL_R1_I2C0_ADDRESS_DEFAULT, &celsius);
+    }
+    else if (event == TWR_TAG_TEMPERATURE_EVENT_ERROR)
+    {
+        twr_log_error("APP: Thermometer error");
     }
 }
 
@@ -78,10 +79,9 @@ void application_init(void)
     twr_button_init(&button, TWR_GPIO_BUTTON, TWR_GPIO_PULL_DOWN, 0);
     twr_button_set_event_handler(&button, button_event_handler, NULL);
 
-    // Initialize thermometer on core module
-    twr_tmp112_init(&tmp112, TWR_I2C_I2C0, TWR_TAG_TEMPERATURE_I2C_ADDRESS_ALTERNATE);
-    twr_tmp112_set_event_handler(&tmp112, tmp112_event_handler, NULL);
-    twr_tmp112_set_update_interval(&tmp112, 10000);
+    twr_tag_temperature_init(&temperature_tag, TWR_I2C_I2C0, TWR_TAG_TEMPERATURE_I2C_ADDRESS_DEFAULT);
+    twr_tag_temperature_set_event_handler(&temperature_tag, temperature_tag_event_handler, NULL);
+    twr_tag_temperature_set_update_interval(&temperature_tag, 10000);
 
     // Initialize radio
     twr_radio_init(TWR_RADIO_MODE_NODE_LISTENING);
