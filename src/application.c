@@ -92,18 +92,18 @@ static void draw_lcd_weather_page(void)
     twr_gfx_clear(gfx);
 
     twr_gfx_set_font(gfx, &twr_font_ubuntu_15);
-    twr_gfx_printf(gfx, 0, 32, true, "Inne");
-    twr_gfx_set_font(gfx, &twr_font_ubuntu_28);
+    twr_gfx_printf(gfx, 0, 8, true, "Inne");
+    twr_gfx_set_font(gfx, &twr_font_ubuntu_33);
     if (!isnan(display_data.in_temp))
-        twr_gfx_printf(gfx, 32, 24, true, "%.1f °C", display_data.in_temp);
+        twr_gfx_printf(gfx, 12, 24, true, "%.1f °C", display_data.in_temp);
 
     twr_gfx_draw_line(gfx, 8, 64, 120, 64, true);
 
     twr_gfx_set_font(gfx, &twr_font_ubuntu_15);
-    twr_gfx_printf(gfx, 0, 96, true, "Ute");
-    twr_gfx_set_font(gfx, &twr_font_ubuntu_28);
+    twr_gfx_printf(gfx, 0, 72, true, "Ute");
+    twr_gfx_set_font(gfx, &twr_font_ubuntu_33);
     if (!isnan(display_data.out_temp))
-        twr_gfx_printf(gfx, 32, 88, true, "%.1f °C", display_data.out_temp);
+        twr_gfx_printf(gfx, 12, 88, true, "%.1f °C", display_data.out_temp);
 }
 
 static void display_update(void *param)
