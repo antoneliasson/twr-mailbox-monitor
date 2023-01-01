@@ -1,6 +1,9 @@
 #include "application.h"
 #include "sensors.h"
 
+// Maximum age of received measurements that are considered valid and should be displayed
+const unsigned int STALE_MEASUREMENT_THRESHOLD = 60 * 60 * 1000;
+
 static twr_led_t lcd_leds;
 
 // BOOT button (LCD buttons and encoder wheel button)
@@ -12,7 +15,9 @@ static twr_gfx_t *gfx;
 struct display_data
 {
     float in_temp;
+    twr_tick_t in_temp_last_timestamp;
     float out_temp;
+    twr_tick_t out_temp_last_timestamp;
 };
 
 struct display_data display_data = {.in_temp = NAN, .out_temp = NAN};
@@ -75,9 +80,11 @@ static void radio_update_sensor(uint64_t *id, const char *topic, void *value, vo
     {
     case SUB_INDOOR_TEMPERATURE:
         display_data.in_temp = *val;
+        display_data.in_temp_last_timestamp = twr_tick_get();
         break;
     case SUB_OUTDOOR_TEMPERATURE:
         display_data.out_temp = *val;
+        display_data.out_temp_last_timestamp = twr_tick_get();
         break;
     default:
         application_error(TWR_ERROR_INVALID_PARAMETER);
@@ -94,7 +101,7 @@ static void draw_lcd_weather_page(void)
     twr_gfx_set_font(gfx, &twr_font_ubuntu_15);
     twr_gfx_printf(gfx, 0, 8, true, "Inne");
     twr_gfx_set_font(gfx, &twr_font_ubuntu_33);
-    if (!isnan(display_data.in_temp))
+    if (!isnan(display_data.in_temp) && twr_tick_get() - display_data.in_temp_last_timestamp < STALE_MEASUREMENT_THRESHOLD)
         twr_gfx_printf(gfx, 12, 24, true, "%.1f °C", display_data.in_temp);
 
     twr_gfx_draw_line(gfx, 8, 64, 120, 64, true);
@@ -102,7 +109,7 @@ static void draw_lcd_weather_page(void)
     twr_gfx_set_font(gfx, &twr_font_ubuntu_15);
     twr_gfx_printf(gfx, 0, 72, true, "Ute");
     twr_gfx_set_font(gfx, &twr_font_ubuntu_33);
-    if (!isnan(display_data.out_temp))
+    if (!isnan(display_data.out_temp) && twr_tick_get() - display_data.out_temp_last_timestamp < STALE_MEASUREMENT_THRESHOLD)
         twr_gfx_printf(gfx, 12, 88, true, "%.1f °C", display_data.out_temp);
 }
 
