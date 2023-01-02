@@ -45,13 +45,13 @@ void sensors_init(void)
 {
     twr_tag_temperature_init(&temperature_tag, TWR_I2C_I2C0, TWR_TAG_TEMPERATURE_I2C_ADDRESS_DEFAULT);
     twr_tag_temperature_set_event_handler(&temperature_tag, temperature_tag_event_handler, NULL);
-    twr_tag_temperature_set_update_interval(&temperature_tag, 10000);
+    twr_tag_temperature_set_update_interval(&temperature_tag, 10*60*1000);
 
     twr_tag_barometer_init(&barometer_tag, TWR_I2C_I2C0);
     twr_tag_barometer_set_event_handler(&barometer_tag, barometer_tag_event_handler, NULL);
-    twr_tag_barometer_set_update_interval(&barometer_tag, 10000);
+    twr_tag_barometer_set_update_interval(&barometer_tag, 10*60*1000);
 
     twr_tag_humidity_init(&humidity_tag, TWR_TAG_HUMIDITY_REVISION_R2, TWR_I2C_I2C0, TWR_TAG_HUMIDITY_I2C_ADDRESS_DEFAULT);
     twr_tag_humidity_set_event_handler(&humidity_tag, humidity_tag_event_handler, NULL);
-    twr_tag_humidity_set_update_interval(&humidity_tag, 10000);
+    twr_tag_humidity_set_update_interval(&humidity_tag, 10*60*1000);
 }
